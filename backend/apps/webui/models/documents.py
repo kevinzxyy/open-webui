@@ -105,12 +105,16 @@ class DocumentsTable:
         except:
             return None
 
-    def get_docs(self) -> List[DocumentModel]:
+    def get_docs(self, user_id: str, is_admin: bool = False) -> List[DocumentModel]:
         with get_db() as db:
+            if is_admin:
+                # Admin users can see all documents
+                query = db.query(Document)
+            else:
+                # Regular users can only see their own documents
+                query = db.query(Document).filter(Document.user_id == user_id)
 
-            return [
-                DocumentModel.model_validate(doc) for doc in db.query(Document).all()
-            ]
+            return [DocumentModel.model_validate(doc) for doc in query.all()]
 
     def update_doc_by_name(
         self, name: str, form_data: DocumentUpdateForm

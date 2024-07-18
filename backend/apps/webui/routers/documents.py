@@ -14,7 +14,7 @@ from apps.webui.models.documents import (
     DocumentResponse,
 )
 
-from utils.utils import get_verified_user, get_admin_user
+from utils.utils import get_verified_user, get_admin_user, get_current_user
 from constants import ERROR_MESSAGES
 
 router = APIRouter()
@@ -26,6 +26,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[DocumentResponse])
 async def get_documents(user=Depends(get_verified_user)):
+    is_admin = user.role == "admin"
     docs = [
         DocumentResponse(
             **{
@@ -33,7 +34,7 @@ async def get_documents(user=Depends(get_verified_user)):
                 "content": json.loads(doc.content if doc.content else "{}"),
             }
         )
-        for doc in Documents.get_docs()
+        for doc in Documents.get_docs(user_id=user.id, is_admin=is_admin)
     ]
     return docs
 
