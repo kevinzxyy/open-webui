@@ -32,7 +32,7 @@ async def get_models(user=Depends(get_verified_user)):
 async def add_new_model(
     request: Request,
     form_data: ModelForm,
-    user=Depends(get_admin_user),
+    user=Depends(get_verified_user),
 ):
     if form_data.id in request.app.state.MODELS:
         raise HTTPException(
@@ -79,7 +79,7 @@ async def update_model_by_id(
     request: Request,
     id: str,
     form_data: ModelForm,
-    user=Depends(get_admin_user),
+    user=Depends(get_verified_user),
 ):
     model = Models.get_model_by_id(id)
     if model:
@@ -108,6 +108,6 @@ async def update_model_by_id(
 
 
 @router.delete("/delete", response_model=bool)
-async def delete_model_by_id(id: str, user=Depends(get_admin_user)):
+async def delete_model_by_id(id: str, user=Depends(get_verified_user)):
     result = Models.delete_model_by_id(id)
     return result
