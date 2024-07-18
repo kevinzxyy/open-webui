@@ -50,7 +50,7 @@ from apps.webui.main import (
     generate_function_chat_completion,
 )
 from apps.webui.internal.db import Session
-
+from apps.webui.routers.models import get_models
 
 from pydantic import BaseModel
 from typing import List, Optional
@@ -934,7 +934,7 @@ app.mount("/api/v1", webui_app)
 webui_app.state.EMBEDDING_FUNCTION = rag_app.state.EMBEDDING_FUNCTION
 
 
-async def get_all_models():
+async def get_all_models(user_id: str = "", user_role: str = ""):
     pipe_models = []
     openai_models = []
     ollama_models = []
@@ -960,8 +960,10 @@ async def get_all_models():
         ]
 
     models = pipe_models + openai_models + ollama_models
-
-    custom_models = Models.get_all_models()
+    if user_id and user_role:
+        custom_models = Models.get_user_models(user_id, user_role)
+    else:
+        custom_models = Models.get_all_models()
     for custom_model in custom_models:
         if custom_model.base_model_id == None:
             for model in models:
@@ -1004,9 +1006,10 @@ async def get_all_models():
     return models
 
 
-@app.get("/api/models")
+@app.get("/api/models")  #
 async def get_models(user=Depends(get_verified_user)):
-    models = await get_all_models()
+    # print(user.id, user.role)
+    models = await get_all_models(user.id, user.role)
 
     # Filter out filter pipelines
     models = [

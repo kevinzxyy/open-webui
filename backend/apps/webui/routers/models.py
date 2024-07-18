@@ -20,6 +20,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[ModelResponse])
 async def get_models(user=Depends(get_verified_user)):
+    print(user.id, user.role)
     return Models.get_all_models()
 
 
@@ -59,7 +60,7 @@ async def add_new_model(
 @router.get("/", response_model=Optional[ModelModel])
 async def get_model_by_id(id: str, user=Depends(get_verified_user)):
     model = Models.get_model_by_id(id)
-
+    print("?????")
     if model:
         return model
     else:

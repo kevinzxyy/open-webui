@@ -144,8 +144,19 @@ class ModelsTable:
 
     def get_all_models(self) -> List[ModelModel]:
         with get_db() as db:
-
             return [ModelModel.model_validate(model) for model in db.query(Model).all()]
+
+    def get_user_models(self, user_id: str, user_role: str) -> List[ModelModel]:
+        with get_db() as db:
+            if user_role == "admin":
+                # Admin users can see all models
+                query = db.query(Model)
+            else:
+                # Regular users can only see their own models and public models
+                query = db.query(Model).filter((Model.user_id == user_id))
+
+            return [ModelModel.model_validate(model) for model in query.all()]
+
 
     def get_model_by_id(self, id: str) -> Optional[ModelModel]:
         try:
