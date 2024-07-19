@@ -1022,7 +1022,7 @@ async def get_models(user=Depends(get_verified_user)):
         if user.role == "user":
             models = list(
                 filter(
-                    lambda model: model["id"] in app.state.config.MODEL_FILTER_LIST,
+                    lambda model: model["id"] not in app.state.config.MODEL_FILTER_LIST,
                     models,
                 )
             )
@@ -1874,7 +1874,7 @@ class ModelFilterConfigForm(BaseModel):
 
 @app.post("/api/config/model/filter")
 async def update_model_filter_config(
-    form_data: ModelFilterConfigForm, user=Depends(get_admin_user)
+        form_data: ModelFilterConfigForm, user=Depends(get_admin_user)
 ):
     app.state.config.ENABLE_MODEL_FILTER = form_data.enabled
     app.state.config.MODEL_FILTER_LIST = form_data.models
